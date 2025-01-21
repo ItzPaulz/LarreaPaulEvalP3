@@ -1,12 +1,19 @@
-﻿namespace LarreaPaulEval3
+﻿using System.IO;
+
+
+namespace LarreaPaulEval3
 {
     public partial class App : Application
     {
-        public App()
+        public static string DatabasePath { get; private set; }
+
+        public App(string databasePath)
         {
             InitializeComponent();
 
-            MainPage = new AppShell();
+            DatabasePath = databasePath;
+
+            MainPage = new AppShell(); 
         }
     }
 }
