@@ -1,88 +1,83 @@
-﻿using System.Windows.Input;
-using LarreaPaulEval3.Models;
+﻿using System.Collections.ObjectModel;
+using System.Net.Http.Json;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Maui;
 using LarreaPaulEval3.Services;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+using LarreaPaulEval3.Models;
 
-namespace LarreaPaulEval3.ViewModels
+
+namespace LarreaPaulEval3.ViewModels;
+
+public partial class SearchViewModel : ObservableObject
 {
-    public class SearchViewModel : INotifyPropertyChanged
+    private readonly MovieService _movieService;
+
+    [ObservableProperty]
+    private string tituloPelicula;
+
+    [ObservableProperty]
+    private string mensajeResultado;
+
+    public ObservableCollection<Pelicula> Peliculas { get; } = new();
+
+    public SearchViewModel()
     {
-        private string _nombrePelicula;
-        private string _mensajeResultado;
-        private readonly MovieAPIService _apiService;
-        private readonly MovieDatabaseService _databaseService;
+        _movieService = new MovieService();
+    }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public string NombrePelicula
+    [RelayCommand]
+    public async Task BuscarPeliculaAsync()
+    {
+        try
         {
-            get => _nombrePelicula;
-            set
+            using var httpClient = new HttpClient();
+            string url = $"https://www.freetestapi.com/api/v1/movies?search={TituloPelicula}";
+            var response = await httpClient.GetFromJsonAsync<List<ApiResponse>>(url);
+
+            if (response != null && response.Count > 0)
             {
-                if (_nombrePelicula != value)
+                var movie = response[0];
+                var actorPrincipal = movie.Actors != null && movie.Actors.Count > 0 ? movie.Actors[0] : "Desconocido";
+                var genero = movie.Genre != null && movie.Genre.Count > 0 ? string.Join(", ", movie.Genre) : "Desconocido";
+
+                MensajeResultado = $"Titulo: {movie.Title}\nGenero: {genero}\nActor Principal: {actorPrincipal}\nPremios: {movie.Awards}\nSitio Web: {movie.Website}\nUsuario: PLarrea";
+
+                var nuevaPelicula = new Pelicula
                 {
-                    _nombrePelicula = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+                    Titulo = movie.Title,
+                    Genero = genero,
+                    ActorPrincipal = actorPrincipal,
+                    Premios = movie.Awards,
+                    SitioWeb = movie.Website,
+                    Usuario = "PLarrea"
+                };
 
-        public string MensajeResultado
-        {
-            get => _mensajeResultado;
-            set
-            {
-                if (_mensajeResultado != value)
-                {
-                    _mensajeResultado = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public ICommand ComandoBuscar { get; }
-        public ICommand ComandoLimpiar { get; }
-
-        public SearchViewModel()
-        {
-            _apiService = new MovieAPIService();
-            _databaseService = new MovieDatabaseService(App.DatabasePath);
-
-            ComandoBuscar = new Command(async () => await BuscarPeliculaAsync());
-            ComandoLimpiar = new Command(LimpiarCampos);
-        }
-
-        private async Task BuscarPeliculaAsync()
-        {
-            if (string.IsNullOrWhiteSpace(NombrePelicula))
-            {
-                MensajeResultado = "Por favor, ingrese un nombre de película.";
-                return;
-            }
-
-            var pelicula = await _apiService.ObtenerPeliculaAsync(NombrePelicula);
-            if (pelicula != null)
-            {
-                await _databaseService.GuardarPeliculaAsync(pelicula);
-                MensajeResultado = $"¡Película guardada! Título: {pelicula.Titulo}";
+                _movieService.AddMovie(nuevaPelicula);
             }
             else
             {
-                MensajeResultado = "No se encontró ninguna película con ese nombre.";
+                MensajeResultado = "No se encontró la película.";
             }
         }
-
-        private void LimpiarCampos()
+        catch (Exception e)
         {
-            NombrePelicula = string.Empty;
-            MensajeResultado = string.Empty;
+            MensajeResultado = $"Error: {e.Message}";
         }
+    }
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+    [RelayCommand]
+    public void EliminarPeliculas()
+    {
+        TituloPelicula = string.Empty;
+        MensajeResultado = string.Empty;
+    }
+
+    public class ApiResponse
+    {
+        public string Title { get; set; }
+        public List<string> Genre { get; set; }
+        public List<string> Actors { get; set; }
+        public string Awards { get; set; }
+        public string Website { get; set; }
     }
 }

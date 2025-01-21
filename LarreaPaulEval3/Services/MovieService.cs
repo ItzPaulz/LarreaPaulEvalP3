@@ -1,35 +1,34 @@
 ﻿using SQLite;
-using LarreaPaulEval3.Models;
+using System.Collections.Generic;
 using System.IO;
+using LarreaPaulEval3.Models;
 
 namespace LarreaPaulEval3.Services
 {
     public class MovieService
     {
-        private readonly SQLiteConnection _database;
+        private readonly SQLiteConnection _baseDatos;
 
         public MovieService()
         {
-            
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "plarrea_movies.db");
-            _database = new SQLiteConnection(dbPath);
-            _database.CreateTable<Pelicula>();
+            var rutaBd = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "peliculas.db");
+            _baseDatos = new SQLiteConnection(rutaBd);
+            _baseDatos.CreateTable<Pelicula>();
         }
 
-
-        public void AddMovie(Pelicula pelicula)
+        public void AgregarPelicula(Pelicula pelicula)
         {
-            _database.Insert(pelicula);
+            _baseDatos.Insert(pelicula);
         }
 
-        public List<Pelicula> GetMovies()
+        public List<Pelicula> ObtenerPeliculas()
         {
-            return _database.Table<Pelicula>().ToList();
+            return _baseDatos.Table<Pelicula>().ToList();
         }
 
-        public void DeleteAllMovies()
+        public void EliminarPeliculas()
         {
-            _database.DeleteAll<Pelicula>();
+            _baseDatos.DeleteAll<Pelicula>();
         }
     }
 }
