@@ -5,7 +5,6 @@ using CommunityToolkit.Maui;
 using LarreaPaulEval3.Services;
 using LarreaPaulEval3.Models;
 
-
 namespace LarreaPaulEval3.ViewModels;
 
 public partial class SearchViewModel : ObservableObject
@@ -37,22 +36,26 @@ public partial class SearchViewModel : ObservableObject
             if (response != null && response.Count > 0)
             {
                 var movie = response[0];
-                var actorPrincipal = movie.Actors != null && movie.Actors.Count > 0 ? movie.Actors[0] : "Desconocido";
-                var genero = movie.Genre != null && movie.Genre.Count > 0 ? string.Join(", ", movie.Genre) : "Desconocido";
+                var actorPrincipal = movie.ActorPrincipal ?? "Desconocido";
+                var genero = string.IsNullOrEmpty(movie.Genero) ? "Desconocido" : movie.Genero;
 
-                MensajeResultado = $"Titulo: {movie.Title}\nGenero: {genero}\nActor Principal: {actorPrincipal}\nPremios: {movie.Awards}\nSitio Web: {movie.Website}\nUsuario: PLarrea";
+                MensajeResultado = $"Titulo: {movie.Titulo}\nGenero: {genero}\nActor Principal: {actorPrincipal}\nPremios: {movie.Premios}\nSitio Web: {movie.SitioWeb}\nUsuario: {movie.Usuario}";
 
                 var nuevaPelicula = new Pelicula
                 {
-                    Titulo = movie.Title,
+                    Titulo = movie.Titulo,
                     Genero = genero,
                     ActorPrincipal = actorPrincipal,
-                    Premios = movie.Awards,
-                    SitioWeb = movie.Website,
-                    Usuario = "PLarrea"
+                    Premios = movie.Premios,
+                    SitioWeb = movie.SitioWeb,
+                    Usuario = movie.Usuario
                 };
 
-                _movieService.AddMovie(nuevaPelicula);
+                // Agregar la nueva película a la base de datos
+                _movieService.AgregarPelicula(nuevaPelicula);
+
+                // Actualizar la lista de películas
+                Peliculas.Add(nuevaPelicula);
             }
             else
             {
@@ -74,10 +77,11 @@ public partial class SearchViewModel : ObservableObject
 
     public class ApiResponse
     {
-        public string Title { get; set; }
-        public List<string> Genre { get; set; }
-        public List<string> Actors { get; set; }
-        public string Awards { get; set; }
-        public string Website { get; set; }
+        public string Titulo { get; set; }
+        public string Genero { get; set; }
+        public string ActorPrincipal { get; set; }
+        public string Premios { get; set; }
+        public string SitioWeb { get; set; }
+        public string Usuario { get; set; } = "PLarrea";
     }
 }

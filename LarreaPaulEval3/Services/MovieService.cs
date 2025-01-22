@@ -21,7 +21,7 @@ namespace LarreaPaulEval3.Services
             _baseDatos.Insert(pelicula);
         }
 
-        public List<Pelicula> ObtenerPeliculas()
+        public List<Pelicula> GetPeliculas()
         {
             return _baseDatos.Table<Pelicula>().ToList();
         }
