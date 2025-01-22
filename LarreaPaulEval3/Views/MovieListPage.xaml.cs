@@ -5,5 +5,6 @@ public partial class MovieListPage : ContentView
 	public MovieListPage()
 	{
 		InitializeComponent();
-	}
+		
+    }
 }

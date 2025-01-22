@@ -3,17 +3,16 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewModels="clr-namespace:LarreaPaulEval3.ViewModels"
-             x:Class="LarreaPaulEval3.Views.MovieListPage"
-             Title="PLarrea - Lista de Películas"
-             BackgroundColor="LightGray">
+             x:Class="LarreaPaulEval3.Views.MovieListPage">
+
     <ContentPage.BindingContext>
-        <viewModels:ListMovieViewModel />
+        <viewModels:MovieListViewModel />
     </ContentPage.BindingContext>
 
     <ContentPage.Content>
         <StackLayout Padding="30" Spacing="15">
-        
-            <Label Text="Lista de Películas"
+
+            <Label Text="PLarrea - Lista de Películas"
                    FontSize="24"
                    HorizontalOptions="Center" 
                    FontAttributes="Bold"
@@ -39,6 +38,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
